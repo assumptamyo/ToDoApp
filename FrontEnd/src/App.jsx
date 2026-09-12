@@ -1,6 +1,4 @@
-import React from "react";
-import { useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Head from "./components/Head";
 import FilterButtons from "./components/FilterButtons";
 import { PlusCircle } from "lucide-react";
@@ -15,14 +13,31 @@ function App() {
   const [filter, setFilter] = useState("All");
   const [showForm, setShowForm] = useState(false);
 
+  // Helper function to clean the API response
+  const extractData = (resData) => {
+    if (resData?.data) return resData.data;
+    if (resData?.task) return resData.task;
+    return resData;
+  };
+
   useEffect(() => {
     const fetchTasks = async () => {
       try {
         setLoading(true);
-        const response = await fetch("https://todo-app-backend-api-t0h2.onrender.com/api/v2/tasks");
+        const response = await fetch(
+          "https://todo-app-backend-api-t0h2.onrender.com/api/v2/tasks"
+        );
         const data = await response.json();
-        setTasks(data);
-        console.log("Fetched tasks:", data);
+
+        if (Array.isArray(data)) {
+          setTasks(data);
+        } else if (Array.isArray(data.tasks)) {
+          setTasks(data.tasks);
+        } else if (Array.isArray(data.data)) {
+          setTasks(data.data);
+        } else {
+          setTasks([]);
+        }
       } catch (err) {
         console.log("Failed to fetch tasks:", err);
       } finally {
@@ -34,23 +49,28 @@ function App() {
 
   const handleNewTask = async (newData) => {
     try {
-      const response = await fetch("http://localhost:5000/api/v2/tasks", {
-        method: "POST",
-        headers: { "content-Type": "application/json" },
-        body: JSON.stringify(newData),
-      });
+      const response = await fetch(
+        "https://todo-app-backend-api-t0h2.onrender.com/api/v2/tasks",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newData),
+        }
+      );
 
       if (response.ok) {
-        const data = await response.json();
-        setTasks((prevTasks) => [data, ...prevTasks]);
-        setShowForm(false)
+        const rawData = await response.json();
+        const createdTask = extractData(rawData);
+        setTasks((prevTasks) => [createdTask, ...prevTasks]);
+        setShowForm(false);
       }
     } catch (err) {
       console.log("Failed to add new task ...", err);
     }
   };
 
-  const filteredTask = tasks.filter((task) => {
+  const safeTasks = Array.isArray(tasks) ? tasks : tasks?.data || [];
+  const filteredTask = safeTasks.filter((task) => {
     if (filter === "Completed") return task.completed;
     if (filter === "Pending") return !task.completed;
     return true;
@@ -58,17 +78,23 @@ function App() {
 
   const handleUpdatedTask = async (id, updatedData) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/v2/tasks/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedData),
-      });
+      const response = await fetch(
+        `https://todo-app-backend-api-t0h2.onrender.com/api/v2/tasks/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedData),
+        }
+      );
 
       if (response.ok) {
-        const data = await response.json();
+        const rawData = await response.json();
+        const updatedTask = extractData(rawData);
 
         setTasks((prevTasks) =>
-          prevTasks.map((task) => (task._id === id ? data : task)),
+          prevTasks.map((task) =>
+            (task._id || task.id) === id ? updatedTask : task
+          )
         );
 
         setEditingTask(null);
@@ -80,13 +106,16 @@ function App() {
 
   const handleDeletedTask = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/v2/tasks/${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `https://todo-app-backend-api-t0h2.onrender.com/api/v2/tasks/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (response.ok) {
         setTasks((prevTasks) =>
-          prevTasks.filter((task) => (task._id || task.id) !== id),
+          prevTasks.filter((task) => (task._id || task.id) !== id)
         );
       }
     } catch (err) {
@@ -94,18 +123,25 @@ function App() {
     }
   };
 
-  const handleToggleTask = async (id) => {
+  const handleToggleTask = async (id, currentCompletedStatus) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/v2/tasks/${id}/toggle`,
-        { method: "PATCH", header: { "Content-Type": "application/json" } },
+        `https://todo-app-backend-api-t0h2.onrender.com/api/v2/tasks/${id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completed: !currentCompletedStatus }),
+        }
       );
 
       if (response.ok) {
-        const data = await response.json();
+        const rawData = await response.json();
+        const updatedTask = extractData(rawData);
 
         setTasks((prevTasks) =>
-          prevTasks.map((task) => (task._id === id ? data : task)),
+          prevTasks.map((task) =>
+            (task._id || task.id) === id ? updatedTask : task
+          )
         );
       }
     } catch (err) {
@@ -121,9 +157,9 @@ function App() {
           <div>
             <button
               onClick={() => setShowForm(true)}
-              className="flex mt-6 sm:mt-0 items-center gap-4 py-3 px-5 font-sm sm:font-meduim mx-auto rounded-xl shadow-lg text-white bg-indigo-900 hover:bg-indigo-800 transition-all cursor-pointer"
+              className="flex mt-6 sm:mt-0 items-center gap-4 py-3 px-5 font-sm sm:font-medium mx-auto rounded-xl shadow-lg text-white bg-indigo-900 hover:bg-indigo-800 transition-all cursor-pointer"
             >
-              <PlusCircle className="w-4 h-4 text-indigo-200"></PlusCircle>
+              <PlusCircle className="w-4 h-4 text-indigo-200" />
               Add New Task
             </button>
           </div>
@@ -140,11 +176,13 @@ function App() {
         />
       </div>
 
-      {/*conditional rendering */}
       {showForm && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center z-50">
           <div className="w-full max-w-3xl p-8">
-            <TaskForm onCancle={() => setShowForm(false)} handleNewTask={handleNewTask} />
+            <TaskForm
+              onCancle={() => setShowForm(false)}
+              handleNewTask={handleNewTask}
+            />
           </div>
         </div>
       )}
