@@ -15,6 +15,7 @@ function TaskEditForm({ task, onCancel, handleUpdatedTask }) {
       title: title.trim(),
       description: description.trim(),
     });
+    onCancel();
   };
 
   return (

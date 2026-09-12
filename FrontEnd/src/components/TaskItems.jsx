@@ -31,7 +31,7 @@ function TaskItems({
         />
       ) : (
         <div
-          className={`p-4 rounded-lg text-white border transition duration-200 ${
+          className={`p-4 rounded-lg text-white border transition duration-200 select-none ${
             task.completed
               ? "bg-gray-800/20 border-white/10 opacity-60"
               : "bg-gray-800/80 border-white/20 hover:border-white/50"
