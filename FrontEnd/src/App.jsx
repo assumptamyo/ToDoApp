@@ -19,7 +19,7 @@ function App() {
     const fetchTasks = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:5000/api/v2/tasks");
+        const response = await fetch("https://todo-app-backend-api-t0h2.onrender.com/api/v2/tasks");
         const data = await response.json();
         setTasks(data);
         console.log("Fetched tasks:", data);
