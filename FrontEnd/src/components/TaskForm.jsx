@@ -1,6 +1,5 @@
-import { X, Check, Plus } from "lucide-react";
-import { useState } from "react";
-import React from "react";
+import React, { useState } from "react";
+import { X, Plus } from "lucide-react";
 
 function TaskForm({ onCancle, handleNewTask }) {
   const [title, setTitle] = useState("");
@@ -21,9 +20,9 @@ function TaskForm({ onCancle, handleNewTask }) {
   };
 
   return (
-    <div className="flex-1 space-y-2 p-5 rounded-lg ">
+    <div className="flex-1 space-y-2 p-5 rounded-lg">
       <div className="flex pb-5 justify-between gap-9 text-white">
-        <h1 className="text-2xl font-bold mx-auto ">Add New Task</h1>
+        <h1 className="text-2xl font-bold mx-auto">Add New Task</h1>
         <button
           className="hover:text-indigo-600 transition-all duration-200"
           onClick={onCancle}
@@ -32,7 +31,7 @@ function TaskForm({ onCancle, handleNewTask }) {
         </button>
       </div>
 
-      <form action="" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <div className="flex flex-col space-y-4">
           <input
             type="text"
@@ -45,13 +44,12 @@ function TaskForm({ onCancle, handleNewTask }) {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-4 resize-none rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-200 rounder-lg bg-gray-700 text-white"
+            className="w-full p-4 resize-none rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-200 bg-gray-700 text-white"
             placeholder="Task's Description (optional) ..."
             rows={3}
           ></textarea>
 
           <div className="flex justify-between gap-3">
-            
             <button
               type="button"
               onClick={onCancle}

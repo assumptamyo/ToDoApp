@@ -7,7 +7,6 @@ import TaskForm from "./components/TaskForm";
 
 function App() {
   const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState({ title: "", description: "" });
   const [editingTask, setEditingTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
@@ -25,7 +24,7 @@ function App() {
       try {
         setLoading(true);
         const response = await fetch(
-          "https://todo-app-backend-api-t0h2.onrender.com/api/v2/tasks"
+          "https://todo-app-backend-api-t0h2.onrender.com/api/v2/tasks",
         );
         const data = await response.json();
 
@@ -55,7 +54,7 @@ function App() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newData),
-        }
+        },
       );
 
       if (response.ok) {
@@ -84,7 +83,7 @@ function App() {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatedData),
-        }
+        },
       );
 
       if (response.ok) {
@@ -93,8 +92,8 @@ function App() {
 
         setTasks((prevTasks) =>
           prevTasks.map((task) =>
-            (task._id || task.id) === id ? updatedTask : task
-          )
+            (task._id || task.id) === id ? updatedTask : task,
+          ),
         );
 
         setEditingTask(null);
@@ -110,12 +109,12 @@ function App() {
         `https://todo-app-backend-api-t0h2.onrender.com/api/v2/tasks/${id}`,
         {
           method: "DELETE",
-        }
+        },
       );
 
       if (response.ok) {
         setTasks((prevTasks) =>
-          prevTasks.filter((task) => (task._id || task.id) !== id)
+          prevTasks.filter((task) => (task._id || task.id) !== id),
         );
       }
     } catch (err) {
@@ -126,12 +125,12 @@ function App() {
   const handleToggleTask = async (id, currentCompletedStatus) => {
     try {
       const response = await fetch(
-        `https://todo-app-backend-api-t0h2.onrender.com/api/v2/tasks/${id}`,
+        `https://todo-app-backend-api-t0h2.onrender.com/api/v2/tasks/${id}/toggle`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ completed: !currentCompletedStatus }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -140,8 +139,8 @@ function App() {
 
         setTasks((prevTasks) =>
           prevTasks.map((task) =>
-            (task._id || task.id) === id ? updatedTask : task
-          )
+            (task._id || task.id) === id ? updatedTask : task,
+          ),
         );
       }
     } catch (err) {
